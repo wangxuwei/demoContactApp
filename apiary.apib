@@ -1,47 +1,1006 @@
 FORMAT: 1A
 HOST: http://www.google.com
 
-# ffff
-Notes API is a *short texts saving* service similar to its physical paper presence on your table.
+# Search APIs
+## Search contacts [/search]
+### Search contacts with some conditions [GET]
 
-# Group Notes
-Notes related resources of the **Notes API**
-
-## Notes Collection [/notes]
-### List all Notes [GET]
-+ Response 200 (application/json)
-
-        [{
-          "id": 1, "title": "Jogging in park"
-        }, {
-          "id": 2, "title": "Pick-up posters from post-office"
-        }]
-
-### Create a Note [POST]
 + Request (application/json)
 
-        { "title": "Buy cheese and bread for breakfast." }
+        {
+            "searchMode" : "power", // The search mode, which is "power" and "verify"
+            "searchValues" : {
+                "q_search" : "java",  // For keywords search
+                "q_objectType" : "All", // For contact type, "Candicate", "Contact" or "All" 
+                "q_status":"All" // For contact status, "Active", "Inactive" or "All"
+            },
+            "searchColumns":"contact,skill,education,company,location", // Columns for display.
+            "skillOperator":"R", // The combination of computing for skills, value are "N", "O", "R"
+            "companyOperator":"O", // The combination of computing for companies, value are "N", "O", "R"
+            "pageIdx" : 1, // The page index.
+            "pageSize" : 30, // The page size.
+            "orderBy" : "contact", // The column for order by
+            "orderType" : "asc" // The type for order type, which os "asc" or "desc"
+        }
 
-+ Response 201 (application/json)
-
-        { "id": 3, "title": "Buy cheese and bread for breakfast." }
-
-## Note [/notes/{id}]
-A single Note object with all its details
-
-+ Parameters
-    + id (required, number, `1`) ... Numeric `id` of the Note to perform action with. Has example value.
-
-### Retrieve a Note [GET]
 + Response 200 (application/json)
-
-    + Header
-
-            X-My-Header: The Value
 
     + Body
 
-            { "id": 2, "title": "Pick-up posters from post-office" }
+            {
+                {
+                    "result" : {
+                        "count" : 8,
+                        "countDuration" : 0,
+                        "duration" : 21,
+                        "exactCount" : true,
+                        "hasNextPage" : false,
+                        "pageIdx" : 1,
+                        "pageSize" : 15,
+                        "result" : [{
+                            "resume" : 490,
+                            "companygroupedids" : "24,389, ...",
+                            "education" : "Rose-Hulman Institute of Technology,Rice University",
+                            "createddate" : "2014-03-12",
+                            "skillgroupedids" : "2242,2202, ...",
+                            "educationgroupedids" : "154,229, ...",
+                            "title" : "",
+                            "lname" : "robert drake",
+                            "skill" : "MATLAB,C++, ...",
+                            "name" : "Robert Drake",
+                            "company" : "Drake's Custom Computers,Drake Rentals, ...",
+                            "location" : "Nashville",
+                            "id" : 490,
+                            "sfid" : "003i000000dMAo8AAG",
+                            "email" : "robertdrake42@gmail.com"
+                        }, 
+                        ...
+                        ],
+                        "selectDuration" : 21
+                    },
+                    "success" : true
+            }
 
-### Remove a Note [DELETE]
-+ Response 204
+## Get Top items [/getTopCompaniesAndEducations]
+### Get top educations/companies/skills/locations for dropdown menus  [GET]
++ Request (application/json)
+
+        {
+            "searchValues" : {
+                "q_objectType":"All",
+                "q_status":"All"
+            },
+            "type" : "skill",
+            "orderByCount" : true,
+            "queryString" : "t",
+            "min" : "2",
+            "pageNum" : 1,
+            "pageSize" : 15
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                "duration" : 17,
+                "selectDuration" : 17,
+                "queryString" : "d",
+                "list" : [{
+                    "count" : 104,
+                    "name" : "DATABASE",
+                    "groupedid" : 2042
+                }, 
+                ...
+                ]
+            },
+            "success" : true
+            }
+
+
+
+## Get Resume [/getResume]
+### Get resume width contact  [GET]
++ Request (application/json)
+
+        {
+            "cid" : "499",
+            "keyword" : "",
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "resume" : "...",
+                    "name" : "Robert Chilcutt",
+                    "exact" : false
+                },
+                "success" : true
+            }
+
+
+## Get pref [/perf/get-user-pref]
+### Get user perf  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "user_id":1,
+                    "name":"filter_order",
+                    "val_text":"[\"contact\",\"company\",\"location\",\"education\",\"skill\"]",
+                    "id":1},
+                "success" : true
+            }
+
+
+## Save pref [/perf/save-user-pref]
+### Save user perf  [POST]
++ Request (application/json)
+
+        {
+            "value" : ["contact","company","location","education","skill"]
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : true,
+                "success" : true
+            }
+
+## Get Configuration [/searchuiconfig]
+### Search Ui Config  [GET]
++ Request (application/json)
+
+        {
+        "org":"JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : 
+                    [
+                        {
+                            "native":true,
+                            "name":"contact",
+                            "show":true,
+                            "title":"Contact",
+                            "type":"contact"
+                        },
+                        ...
+                    ],
+                "success":true
+            }
+
+
+
+## Get system configuration [/getSearchConfig]
+### Get system configuration, require admin token  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "content":"<searchconfig>...</searchconfig>"
+                },
+                "success" : true
+            }
+
+
+## Reset system configuration [/resetSearchConfig]
+### Reset system configuration to default, require admin token  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : "<searchconfig>...</searchconfig>",
+                "success" : true
+            }
+
+
+## Save system configuration [/saveSearchConfig]
+### Save system configuration, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "content" : "<searchconfig>...</searchconfig>"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "valid" : true
+                },
+                "success" : true
+            }
+
+
+
+## Get org configuration [/getOrgSearchConfig]
+### Get org configuration, require admin token  [GET]
++ Request (application/json)
+
+        {
+            "orgName":"JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "content":"<searchconfig>...</searchconfig>"
+                },
+                "success" : true
+            }
+
+
+
+## Reset org configuration [/resetOrgSearchConfig]
+### Reset org configuration to default, require admin token [GET]
++ Request (application/json)
+
+        {
+            "orgName":"JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : "<searchconfig>...</searchconfig>",
+                "success" : true
+            }
+
+
+
+## Save Org Configuration [/saveOrgSearchConfig]
+### Save Org Configuration, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgName":"JobScience",
+            "content" : "<searchconfig>...</searchconfig>"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "valid" : true
+                },
+                "success" : true
+            }
+
+
+
+
+
+
+## Clear All Caches [/cache-refresh-all]
+### Clear all caches, require admin token [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+## Clear Org Cache [/cache-refresh]
+### Clear all org caches by given orgName, require admin token  [GET]
++ Request (application/json)
+
+        {
+            "orgName" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+## Save Config [/config/save]
+### Save custom config for org, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgId" : 1,
+            "configsJson" : {
+                "local_distance" : "k",
+                "local_date" : "YYYY-MM-DD",
+                "action_add_to_sourcing" : false,
+                "action_favorite" : false,
+                "skill_assessment_rating" : false,
+                "advanced_auto_complete" : false,
+                "instance_url" : "",
+                "apex_resume_url" : "",
+                "canvasapp_secret" : "",
+                "sessionExpireDuration" : ""
+            }
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+## Get Config Value [/config/get/{name}]
+### Get value by name from org, require admin token  [GET]
++ Parameters
+    + name (optional, string, `instance_url`) ... string `instance_url` value is for salesforce instance url, if the name is null return configs map
+
++ Request (application/json)
+
+        {
+            "orgId" : 1
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                result:{
+                    "local_distance" : "k",
+                    "local_date" : "YYYY-MM-DD",
+                    "action_add_to_sourcing" : false,
+                    "action_favorite" : false,
+                    "skill_assessment_rating" : false,
+                    "advanced_auto_complete" : false,
+                    "instance_url" : "",
+                    "apex_resume_url" : "",
+                    "canvasapp_secret" : "",
+                    "sessionExpireDuration" : ""
+                }
+                "success" : true
+            }
+
+
+
+## Start Setup Org Schema [/admin-org-setup]
+### Start setup org schema, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "org" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+## Stop Setup Org Schema [/stop-org-setup]
+### Stop setup org schema, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "org" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+## Get Setup Org Schema Status [/admin-org-status]
+### Get setup org schema status, require admin token  [GET]
++ Request (application/json)
+
+        {
+            "org" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "setups" : [{
+                        "msg" : "Org Schema Exists",
+                        "name" : "schema",
+                        "status" : "done"
+                    }, {
+                        "msg" : "Default sync tables valid",
+                        "name" : "ts2_table",
+                        "status" : "done"
+                    }, {
+                        "msg" : "jss tables valid valid",
+                        "name" : "jss_table",
+                        "status" : "done"
+                    }, {
+                        "name" : "fix_old_jss_table",
+                        "status" : "done"
+                    }, {
+                        "msg" : "Jss tables created",
+                        "name" : "create_extra_table",
+                        "status" : "done"
+                    }, {
+                        "pgtrgm" : "done"
+                    }, {
+                        "name" : "cityscore",
+                        "progress" : {
+                            "perform" : 218631,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "tsv",
+                        "progress" : {
+                            "perform" : 218631,
+                            "remaining" : 0
+                        },
+                        "status" : "notstarted"
+                    }, {
+                        "name" : "tsv",
+                        "progress" : {
+                            "perform" : 499,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "resume",
+                        "progress" : {
+                            "perform" : 499,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "sfid",
+                        "progress" : {
+                            "perform" : 499,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "indexes",
+                        "progress" : {
+                            "perform" : 33,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "current_index",
+                        "value" : "jss_contact_jss_groupby_educations_pkey",
+                        "status" : "done"
+                    }, {
+                        "name" : "skill",
+                        "progress" : {
+                            "perform" : 18431,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "education",
+                        "progress" : {
+                            "perform" : 376,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }, {
+                        "name" : "employer",
+                        "progress" : {
+                            "perform" : 1372,
+                            "remaining" : 0
+                        },
+                        "status" : "done"
+                    }],
+                    "status" : "done"
+                },
+                "success" : true
+            }
+
+
+## Reset Setup Org Schema [/reset-org-setup]
+### Reset setup org schema, so we can restart setup, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "org" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+## Get Setup System Schema Status [/admin-sys-status]
+### Get setup system schema status, require admin token [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "import_city" : {
+                        "status" : "notstarted"
+                    },
+                    "import_zipcode" : {
+                        "status" : "notstarted"
+                    },
+                    "create_sys_schema" : {
+                        "status" : "notstarted"
+                    },
+                    "create_extension" : {
+                        "status" : "notstarted"
+                    },
+                    "check_missing_columns" : {
+                        "status" : "notstarted"
+                    },
+                    "import_city_world" : {
+                        "status" : "notstarted"
+                    },
+                    "status" : "notstarted"
+                },
+                "success" : true
+            }
+
+
+## Start Setup System Schema [/admin-sys-start]
+### Start setup system schema, require admin token  [POST]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "import_city" : {
+                        "status" : "notstarted"
+                    },
+                    "import_zipcode" : {
+                        "status" : "notstarted"
+                    },
+                    "create_sys_schema" : {
+                        "status" : "notstarted"
+                    },
+                    "create_extension" : {
+                        "status" : "notstarted"
+                    },
+                    "check_missing_columns" : {
+                        "status" : "notstarted"
+                    },
+                    "import_city_world" : {
+                        "status" : "notstarted"
+                    },
+                    "status" : "notstarted"
+                },
+                "success" : true
+            }
+
+
+## Reset System Schema [/admin-sys-reset]
+### Reset system schema, require admin token  [POST]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "import_city" : {
+                        "status" : "notstarted"
+                    },
+                    "import_zipcode" : {
+                        "status" : "notstarted"
+                    },
+                    "create_sys_schema" : {
+                        "status" : "notstarted"
+                    },
+                    "create_extension" : {
+                        "status" : "notstarted"
+                    },
+                    "check_missing_columns" : {
+                        "status" : "notstarted"
+                    },
+                    "import_city_world" : {
+                        "status" : "notstarted"
+                    },
+                    "status" : "notstarted"
+                },
+                "success" : true
+            }
+
+
+## Remove All Indexes [/removeAllIndexes]
+### Remove all indexes, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgName" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : 18,
+                "success" : true
+            }
+
+
+## Drop All Extra Tables [/dropExTables]
+### Drop all extra tables, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgName" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+## Rebuild Resume Tsv Column [/rebuildResume]
+### Rebuild resume tsv column, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgName" : "JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+## Enlarge Org Table [/multiplyData]
+### Multiply org table data by given times, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "orgName" : "JobScience",
+            "tableName" : "ts2__skill__c",
+            "times" : 1
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "cost" : 5,
+                    "currentDbSize" : 146
+                },
+                "success" : true
+            }
+
+## Get The Multiply Data Status [/getMultiplyStatus]
+### Get the multiply data status, require admin token  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "currentTime" : 0
+                },
+                "success" : true
+            }
+
+## Stop The Multiply Data [/stopMultiply]
+### Stop the multiply data, require admin token  [POST]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+
+
+## Create Or Update An Org [/org/save]
+### Create or update an org, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "name":"JobScience",
+            "id":"1",
+            "schemaname":"demo64",
+            "sfid":""
+            "orgId":"1"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : 1,
+                "success" : true
+            }
+
+
+## Get An Org [/org/get/]
+### Get an org by id, require admin token  [GET]
++ Request (application/json)
+
+        {
+            "id":"1"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : [{
+                    "schemaname" : "demo64",
+                    "name" : "JobScience",
+                    "id" : 1,
+                    "sfid" : "1"
+                }],
+                "success" : true
+            }
+
+
+## Delete An Org [/org/del/]
+### Delete an org, require admin token  [POST]
++ Request (application/json)
+
+        {
+            "id":"1"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+## List Orgs [/org/list]
+### List orgs, require admin token  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : [{
+                    "schemaname" : "demo64",
+                    "name" : "JobScience",
+                    "id" : 1,
+                    "sfid" : ""
+                }
+                ...
+                ],
+                "success" : true
+            }
+
+
+
+## Test Get Orgs [/test/getOrgs]
+### Test get orgs, require admin token  [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : [{
+                    "schemaname" : "demo64",
+                    "name" : "JobScience",
+                    "id" : 1,
+                    "sfid" : ""
+                }
+                ...
+                ],
+                "success" : true
+            }
+
+
+## Test Save A Contact [/test/saveContact]
+### Test save a contact, require admin token [POST]
++ Request (application/json)
+
+        {
+            "org":"JobScience"
+            "test.name":"Robert Banana"
+            "test.firstname":"Robert"
+            "test.lastname":"Banana"
+            "test.phone":"123456"
+            "test.mobilephone":"123456""
+            "test.mailingcity":"LA"
+            "test.mailingpostalcode":"123456"
+            "test.mailingstate":"CA"
+            "test.mailingstreet":""
+            "test.mailingcountry":"USA"
+            "test.fax":"12345"
+            "test.title":"Tester"
+            "test.email":"robert@gmail.com"
+            "test.ts2__text_resume__c":"retume"
+            "skills":"JAVA"
+            "educations":"Belarusian National Technical University"
+            "companies":"IBM"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
+
+
+
+## Search Warmup [/warmup/search]
+### Search warmup, require admin token [GET]
++ Request (application/json)
+
+        {
+            "searchColumns":"contact,company,skill,education,location"
+            "searchValues":{
+                "q_search":"Java",
+                "q_locations":[
+                    {"name":"San Francisco","minRadius":"30"}
+                ]
+            }
+            "org":"JobScience"
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "countDuration" : 4,
+                    "duration" : 4,
+                    "count" : 0
+                },
+                "success" : true
+            }
+
+
+
+## Auto Complete Warmup [/warmup/autocomplete]
+### Auto complete warmup, require admin token [GET]
++ Request (application/json)
+
+        {
+            "searchColumns":"contact,company,skill,education,location"
+            "searchValues":{
+                "q_search":"SalesForce"
+            }
+            "org":"JobScience"
+            "type":"company"
+            "queryString":"SalesForce"
+            "orderByCount":true
+        }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "result" : {
+                    "duration" : 4,
+                    "count" : 0
+                },
+                "success" : true
+            }
+
+
+
+## Check Status Warmup [/warmup/checkStatus]
+### Check status warmup, require admin token [GET]
++ Request (application/json)
+
+        (None)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "success" : true
+            }
+
+
